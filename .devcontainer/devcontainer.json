@@ -1,0 +1,14 @@
+{
+  "name": "Blind Spot Motion Studio",
+  "build": { "dockerfile": "../devcontainer/Dockerfile", "context": ".." },
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": { "label": "Remotion Studio", "onAutoForward": "openBrowser" }
+  },
+  "postCreateCommand": "npm install",
+  "customizations": {
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
+    }
+  }
+}
