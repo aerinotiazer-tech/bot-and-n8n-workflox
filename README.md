@@ -1,62 +1,52 @@
 # Blind Spot Studio
 
-**OpenChatCut est l'éditeur principal; Blender fournit les plans 3D; OpenCode relie les deux avec Groq.** Le Codespace installe l'application de montage, un Blender sans interface graphique pour la production automatisée, FFmpeg et l'agent MCP. La voix off reste celle du créateur.
+**Un seul atelier de production : OpenChatCut pour la timeline, Blender pour les plans 3D, OpenCode pour piloter les deux.** La voix off enregistrée par le créateur reste la piste principale; le workflow est prévu pour partir d'un enregistrement brut, sans correction préalable.
 
-## Ce qui remplace l'ancien prototype
+## Ce qui est installé
 
-Le premier prototype Remotion personnalisé a été retiré. L'application centrale est maintenant le dépôt amont [OpenChatCut](https://github.com/0xsline/OpenChatCut), épinglé comme sous-module dans [`apps/openchatcut`](apps/openchatcut). Il fournit une vraie timeline multi-pistes, montage conversationnel, titres, transitions, captions, motion graphics/WebGL, aperçu et export.
+Le projet amont [OpenChatCut](https://github.com/0xsline/OpenChatCut) est épinglé comme sous-module dans [`apps/openchatcut`](apps/openchatcut). Il fournit une vraie timeline multi-pistes, montage conversationnel, captions, motion graphics/WebGL, aperçu et export.
 
-[DCC-MCP Blender](https://github.com/dcc-mcp/dcc-mcp-blender) tourne à côté, en mode headless, dans le même Codespace. Son serveur MCP permet à l'agent de créer/modifier des scènes Blender, animer caméra et objets, faire des rendus et produire des plans réellement 3D. Les plans rendus sont ensuite importés dans OpenChatCut pour constituer le montage final.
+[DCC-MCP Blender](https://github.com/dcc-mcp/dcc-mcp-blender) tourne en mode headless dans le même Codespace. Il apporte le serveur MCP pour créer et rendre des scènes réelles en 3D. L'agent peut insérer les rendus dans le montage OpenChatCut; tu peux revoir et retoucher la timeline dans l'éditeur. Le viewport Blender graphique n'est pas visible dans ce Codespace.
 
-[OpenCode](https://opencode.ai/) est le seul agent de coordination. Sa configuration relie simultanément le MCP OpenChatCut et le MCP Blender. Le modèle Groq configuré est `qwen/qwen3.8-27b`, validé comme identifiant par OpenCode et choisi pour sa capacité de tool use. La fiche Groq actuelle ne documente pas explicitement l’envoi d’images pour ce modèle : ne compte pas sur l’inspection visuelle automatique des rendus. Tu peux fournir les retours à l’agent sous forme de notes; change vers un modèle Groq vision uniquement après avoir vérifié qu’il accepte aussi les outils MCP. Les consignes Blind Spot et les règles de montage sont dans [`AGENTS.md`](AGENTS.md).
+[OpenCode](https://opencode.ai/) relie l'agent aux MCP OpenChatCut et Blender. Le modèle configuré est `groq/qwen/qwen3.8-27b`. Les consignes de montage et de charte sont dans [`AGENTS.md`](AGENTS.md).
 
-> **Coût Groq :** le catalogue consulté affiche `qwen/qwen3.8-27b` à 0,80 $/million de tokens d'entrée et 4,00 $/million de tokens de sortie. Ce n'est donc pas un modèle gratuit. Pour utiliser un autre modèle, change `model` dans `.opencode/opencode.json` après avoir vérifié qu'il supporte les outils MCP. Pour analyser des images, vérifie explicitement le support vision dans la fiche officielle du modèle. Les tarifs et identifiants changent; vérifie le catalogue Groq avant un projet long.
+## Groq : l'offre gratuite vérifiée
 
-## Démarrer
+Oui : la documentation actuelle de Groq inclut `qwen/qwen3.8-27b` dans le tableau des limites **Free Plan** : 30 requêtes/minute, 1 000/jour, 8 000 tokens/minute et 200 000/jour. Il s'agit d'un modèle **Preview**, qui peut changer. Sur le plan payant Developer, la fiche affiche 0,80 $/million de tokens entrants et 4,00 $/million sortants; ces prix ne signifient pas que l'utilisation sous le quota Free est facturée. Le niveau actif et les plafonds exacts de ton organisation sont visibles dans Groq Console. [Limites officielles](https://console.groq.com/docs/rate-limits) · [Modèles et tarifs](https://console.groq.com/docs/models) · [Tool use](https://console.groq.com/docs/tool-use)
 
-1. Ouvre le dépôt dans **GitHub Codespaces**. Le conteneur utilise Node.js 24 requis par OpenChatCut, Blender 4.5.13 téléchargé depuis le site Blender avec vérification SHA-256, et FFmpeg.
-2. Le premier post-création initialise le sous-module, installe les dépendances OpenChatCut sans le paquet CUDA optionnel et installe DCC-MCP dans le Python embarqué de Blender. Ce téléchargement est plus lourd qu'un simple starter, mais prépare le vrai pipeline.
-3. Ajoute `GROQ_API_KEY` dans **Settings → Codespaces → Secrets** du dépôt, si ce n'est pas déjà fait. Le code ne contient pas la clé. Le modèle est déjà indiqué dans `.opencode/opencode.json`.
-4. À l'ouverture du Codespace, les services démarrent automatiquement. OpenChatCut est servi sur le port 5199 et s'ouvre dans le navigateur; le port Blender MCP 9765 reste local au Codespace.
-5. Dans un terminal Codespaces, lance `./scripts/run-agent.sh`. Demande par exemple : *« Crée le projet d'épisode à partir de ma voix off et de mon script; respecte les jalons; utilise OpenChatCut pour le montage et Blender MCP pour les plans nécessitant une vraie 3D. Ne remplace pas ma voix. »*
-6. Reviens dans OpenChatCut pour inspecter, retoucher la timeline, ajuster les coupes et exporter. Enregistre les exports à récupérer dans `projects/<episode>/exports/` (les médias et exports sont ignorés par Git).
+La transcription utilise Groq `whisper-large-v3-turbo`, avec langue `fr`. La doc Groq inscrit Whisper Turbo dans les limites Free à 20 requêtes/minute, 2 000/jour, 7 200 secondes audio/heure et 28 800/jour. L'upload Free direct est limité à 25 Mo par fichier; le tarif affiché sur le plan Developer est 0,04 $/heure. Le modèle est multilingue et renvoie des timestamps au mot si on les demande. [Speech-to-text Groq](https://console.groq.com/docs/speech-to-text) · [Limites Free](https://console.groq.com/docs/rate-limits)
+
+Les plafonds changent et s'appliquent à l'organisation entière; en cas de quota dépassé, l'API peut renvoyer 429. Le tutoriel explique les limites et le traitement des fichiers trop lourds.
+
+## Démarrer dans Codespaces
+
+1. Ouvre le dépôt dans GitHub Codespaces sur `main`. Si le Codespace existait déjà avant la mise à jour, fais `git pull origin main`, puis **Rebuild Container** pour recharger les paramètres et dépendances.
+2. Au premier build, Codespaces installe Node 24, OpenChatCut, Blender 4.5.13, FFmpeg, DCC-MCP et OpenCode. Le téléchargement initial est conséquent.
+3. Les services démarrent automatiquement : OpenChatCut sur le port privé 5199, Blender MCP sur le port local 9765. Le secret `GROQ_API_KEY` déjà configuré dans Codespaces est réutilisé par OpenCode et pour la transcription Groq; sa valeur n'est jamais imprimée.
+4. Lance `./scripts/run-agent.sh` depuis un terminal Codespaces. Dans l'éditeur, dépose l'enregistrement brut, place-le sur la piste narration, puis demande à l'agent de le transcrire, nettoyer prudemment et monter les visuels.
+5. Consulte le guide complet et son prompt prêt à coller dans [`TUTORIEL_VOIX_OFF.md`](TUTORIEL_VOIX_OFF.md). Il couvre les répétitions, les blancs, la vérification de l'ASR, le sound design et les limites de la suppression automatique française.
 
 Commandes utiles :
 
 ```bash
-# Lancer ou relancer OpenChatCut et Blender MCP
-bash .devcontainer/start-services.sh
-
-# Voir les journaux
+bash .devcontainer/start-services.sh  # lancer/relancer les services
+./scripts/run-agent.sh                # ouvrir l'agent OpenCode
  tail -f .runtime/openchatcut.log
  tail -f .runtime/blender-mcp.log
-
-# Démarrer l'agent Groq/OpenCode
-./scripts/run-agent.sh
 ```
 
-## Codespaces secrets et configuration
+## Voix off brute et sound design
 
-- `GROQ_API_KEY` est lu depuis l'environnement Codespaces par OpenCode via `{env:GROQ_API_KEY}`. Ne le mets pas dans `.env`, un fichier versionné, le sous-module ou un prompt.
-- Un jeton local `OPENCHATCUT_MCP_TOKEN` est généré avec des permissions restreintes dans `~/.config/blindspot/`; il authentifie la connexion locale d'OpenCode à OpenChatCut. Il ne quitte pas le Codespace et n'est pas versionné.
-- Le serveur Blender MCP écoute sur `127.0.0.1:9765`; il n'est pas publié par le forwarding Codespaces. Le navigateur n'accède qu'à l'interface OpenChatCut sur 5199.
-- Les projets/media d'OpenChatCut résident dans son profil de développement local sous `~/.openchatcut/dev-profiles/`, pas dans Git. Les fichiers téléchargés/exportés doivent être enregistrés dans `projects/` pour être facilement récupérés depuis le workspace. Les médias sont ignorés par Git par défaut.
+Le démarrage fixe `PREFERRED_TRANSCRIPTION_PROVIDER=groq`, `GROQ_TRANSCRIPTION_MODEL=whisper-large-v3-turbo` et `TRANSCRIPTION_LANGUAGE=fr`. OpenChatCut dispose de `transcribe_track`, `clean_script` pour le nettoyage mécanique, `read_script` / `apply_script` pour l'édition par le sens, et `browse_library` / `add_audio` pour ajouter des ambiances et SFX. La routine d'agent demande de compresser les blancs manifestement trop longs, de préserver respiration et intention, de repérer les faux départs et phrases répétées par erreur, puis d'écouter les raccords.
 
-## Validation et limites honnêtes
+Le matching automatique des mots parasites ne garantit pas le français. L'agent doit vérifier lui-même « euh », hésitations et répétitions dans la transcription; il ne doit pas supprimer les mots ambigus par simple ressemblance. L'original est conservé et les coupes restent révisables.
 
-Le dépôt amont OpenChatCut est un éditeur tôt dans son développement (Node 24, licence AGPL-3.0); le sous-module est volontairement épinglé à un commit précis. DCC-MCP Blender est un projet distinct (MIT) avec tests headless sur Blender 4.5.13 et 5.2.1. Le Codespace utilise sa voie headless : l'agent peut construire et rendre des scènes, mais **tu ne vois pas le viewport Blender live**. Tu prévisualises le rendu dans OpenChatCut et fais tes retouches dans sa timeline. Le rendu Blender et les exports vidéo peuvent être lents en CPU; un Codespace sans GPU n'est pas un poste de rendu final accéléré.
+Pour la charte Blind Spot : voix au premier plan, ambiance sombre discrète, quelques whooshes/impacts/ticks aux moments utiles, pas de bruitage permanent. Garde les sons tiers sur une piste séparée et note leur provenance.
 
-Ce n'est pas une copie de l'interface After Effects : OpenChatCut fournit le montage/motion 2D-WebGL, Blender apporte la vraie 3D, et les deux restent éditables dans leur outil respectif. Les projets Blender (`.blend`) et les assets intermédiaires doivent être explicitement enregistrés dans le dossier de l'épisode.
+## Limites et sécurité
 
-## Sources amont
+OpenChatCut est encore tôt dans son développement et sous licence AGPL-3.0; Blender et ses rendus utilisent le CPU du Codespace, ce qui peut être lent. Le projet est un atelier assemblé, pas une copie d'After Effects : OpenChatCut apporte la timeline et le motion 2D/WebGL, Blender la vraie 3D.
 
-- [OpenChatCut — dépôt, installation, MCP externe, fonctionnalités et licence](https://github.com/0xsline/OpenChatCut)
-- [DCC-MCP Blender — MCP headless, API typée, versions Blender testées et licence](https://github.com/dcc-mcp/dcc-mcp-blender)
-- [OpenCode — fournisseurs, Groq et serveurs MCP](https://opencode.ai/docs/mcp-servers/)
-- [Modèles Groq](https://console.groq.com/docs/models) et [vision + tool use](https://console.groq.com/docs/vision)
-- [Codespaces — documentation](https://docs.github.com/en/codespaces/overview)
+Le lockfile amont observé avait un avis critique `proxy-addr` avant la version corrective `2.0.8`. Le setup applique un override ciblé dans l'installation locale du sous-module, sans modifier son dépôt amont. L'audit de production relevait encore 17 avis (7 élevés, 10 modérés) dans les dépendances amont après cette correction; le port de l'éditeur est privé et le port Blender MCP n'est pas forwardé. N'exécute pas `npm audit fix --force` aveuglément.
 
-
-## Note de sécurité npm
-
-Le lockfile amont observé pendant l'intégration résolvait `proxy-addr` sous la version corrective `2.0.8` (avis critique GHSA-jqcg-44mw-7w3h). Le setup Codespaces ajoute un override local vers `2.0.8`, puis réinstalle et vérifie cette version; le source amont et le lockfile du sous-module ne sont pas commités comme fork. Après ce correctif, l'audit de production npm signale encore **17 avis** (7 élevés, 10 modérés) dans les dépendances amont. Pour limiter l'exposition, le port de l'éditeur est privé et le port du serveur Blender MCP n'est jamais forwardé. Ne rends pas le port 5199 public. Refaire `npm audit` au fil des mises à jour du dépôt OpenChatCut et n'appliquer aucun `npm audit fix --force` aveuglément.
+Les médias et exports sont ignorés par Git par défaut. Enregistre les livrables à récupérer dans `projects/<episode>/exports/`. Le détail des secrets et des commandes est dans le tutoriel.

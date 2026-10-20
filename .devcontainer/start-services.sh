@@ -14,6 +14,12 @@ if [[ ! -s "$TOKEN_FILE" ]]; then
 fi
 export OPENCHATCUT_MCP_TOKEN="$(cat "$TOKEN_FILE")"
 
+# The existing Codespaces secret is shared by OpenCode and OpenChatCut's Groq ASR.
+# These defaults let a fresh recording go straight to French word-timestamped ASR.
+export PREFERRED_TRANSCRIPTION_PROVIDER="groq"
+export GROQ_TRANSCRIPTION_MODEL="whisper-large-v3-turbo"
+export TRANSCRIPTION_LANGUAGE="fr"
+
 # Codespaces forwards the editor over HTTPS; tell OpenChatCut which origin to trust.
 if [[ -n "${CODESPACE_NAME:-}" && -n "${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN:-}" ]]; then
   export OPENCHATCUT_EDITOR_URL="https://${CODESPACE_NAME}-5199.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
