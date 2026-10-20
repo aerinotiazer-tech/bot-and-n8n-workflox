@@ -1,0 +1,28 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "groq/qwen/qwen3.8-27b",
+  "provider": {
+    "groq": {
+      "options": {
+        "apiKey": "{env:GROQ_API_KEY}"
+      }
+    }
+  },
+  "mcp": {
+    "openchatcut": {
+      "type": "remote",
+      "url": "http://127.0.0.1:5199/api/external-mcp/mcp",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer {env:OPENCHATCUT_MCP_TOKEN}",
+        "x-openchatcut-mcp-client": "opencode",
+        "x-openchatcut-mcp-surface": "external"
+      }
+    },
+    "blender": {
+      "type": "remote",
+      "url": "http://127.0.0.1:9765/mcp",
+      "enabled": true
+    }
+  }
+}

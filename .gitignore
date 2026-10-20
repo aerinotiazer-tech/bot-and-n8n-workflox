@@ -1,11 +1,25 @@
+# Node / Python
 node_modules/
-out/
-.cache/
+.venv/
+__pycache__/
+*.py[cod]
+
+# Private production material and exports
+media/
+projects/**/media/
+projects/**/renders/
+projects/**/exports/
+*.blend
+*.blend1
+*.mp4
+*.mov
+*.wav
+*.mp3
+*.m4a
+
+# Local service state, logs and tokens
+.runtime/
 .env
 .env.*
 !.env.example
-__pycache__/
-*.py[cod]
-*.blend1
-.DS_Store
-media/private/
+*.log

@@ -1,14 +1,29 @@
 {
-  "name": "Blind Spot Motion Studio",
-  "build": { "dockerfile": "../devcontainer/Dockerfile", "context": ".." },
-  "forwardPorts": [3000],
-  "portsAttributes": {
-    "3000": { "label": "Remotion Studio", "onAutoForward": "openBrowser" }
+  "name": "Blind Spot Studio — OpenChatCut + Blender",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "BLENDER_VERSION": "4.5.13"
+    }
   },
-  "postCreateCommand": "npm install",
+  "remoteUser": "vscode",
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "postStartCommand": "bash .devcontainer/start-services.sh",
+  "forwardPorts": [5199],
+  "portsAttributes": {
+    "5199": {
+      "label": "OpenChatCut — montage Blind Spot",
+      "onAutoForward": "openBrowser",
+      "visibility": "private"
+    }
+  },
   "customizations": {
     "vscode": {
-      "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "files.trimTrailingWhitespace": true
+      },
+      "extensions": ["ms-python.python"]
     }
   }
 }
